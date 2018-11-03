@@ -8,9 +8,66 @@ import Spinner from '../layout/Spinner';
 import classnames from 'classnames';
 
 export class ClientDetails extends Component {
+    state = {
+        showBalanceUpdate: false,
+        balanceUpdateAmount: ''
+    }
+    deleteClient = () => {
+        const { client, firestore, history } = this.props;
+        firestore.delete({
+            collection: 'clients',
+            doc: client.id
+        })
+        .then(()=> history.push('/'));
+    }
+    onChange = (e) => {
+        this.setState({
+            [e.target.name] : e.target.value
+        });
+    }
+    balanceSubmit = (e) => {
+        e.preventDefault();
+        const { client, firestore } = this.props;
+        const {balanceUpdateAmount } = this.state;
+        if(parseFloat(balanceUpdateAmount) > 0 ){
+            const clientUpdate = {
+                balance: parseFloat(balanceUpdateAmount)
+            };
+            firestore.update({
+                collection: 'clients',
+                doc: client.id
+            }, clientUpdate);
+            this.setState({
+                showBalanceUpdate: false,
+                balanceUpdateAmount: ''
+            });
+        }
+    }
   render() {
-    const { client } = this.props;
-      
+        const { client } = this.props;
+        const { showBalanceUpdate, balanceUpdateAmount } = this.state;
+
+        let balanceForm = '';
+
+        if(showBalanceUpdate){
+            balanceForm = (
+                <form onSubmit={this.balanceSubmit}>
+                    <div className="input-group">
+                        <input type="text" 
+                            className="form-control"
+                            name="balanceUpdateAmount"
+                            placeholder="Add new balance"
+                            value={balanceUpdateAmount}
+                            onChange={this.onChange}/>
+                            <div className="input-group-append">
+                                <input type="submit" value="Update" className="btn btn-outline-dark" />
+                            </div>
+                    </div>
+                </form>
+            )
+        }else{
+            balanceForm = null;
+        }
       if(client){
         return (
             <div>
@@ -23,7 +80,9 @@ export class ClientDetails extends Component {
                     <div className="col-md-6">
                         <div className="btn-group float-right">
                             <Link to={`/client/edit/${client.id}`} className="btn btn-dark">Edit</Link>
-                            <button className="btn btn-danger">Delete</button>
+                            <button 
+                                onClick={this.deleteClient}
+                                className="btn btn-danger">Delete</button>
                         </div>
                     </div>
                 </div>
@@ -37,11 +96,18 @@ export class ClientDetails extends Component {
                             </div>
                             <div className="col-md-4 col-sm-6">
                                 <h3 className="pull-right">Balance: 
-                                <span className={classnames({
-                                    'text-danger': client.balance > 0,
-                                    'text-success': client.balance === 0
-                                })}>${parseFloat(client.balance).toFixed(2)}</span>
+                                    <span className={classnames({
+                                        'text-danger': client.balance > 0,
+                                        'text-success': client.balance === 0
+                                    })}>${parseFloat(client.balance).toFixed(2)}</span>{' '}
+                                    <small>
+                                        <a href="#!" 
+                                            onClick={() => this.setState({showBalanceUpdate: !this.state.showBalanceUpdate})}>
+                                                <i className="fas fa-pencil-alt"/>
+                                            </a>
+                                    </small>
                                 </h3>
+                                {balanceForm}
                             </div>
                         </div>
                         <hr/>
