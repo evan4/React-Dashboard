@@ -136,4 +136,4 @@ export default compose(
     connect(({ firestore: { ordered } }, props) => ({
       client: ordered.client && ordered.client[0]
     }))
-  )(ClientDetails);
+)(ClientDetails);
