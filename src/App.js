@@ -26,7 +26,7 @@ class App extends Component {
                 <Route exact path="/client/add" component={UserIsAuthenticated(AddClient)} />
                 <Route exact path="/client/:id" component={UserIsAuthenticated(ClientDetails)} />
                 <Route exact path="/login" component={UserIsNotAuthenticated(Login)} />
-                <Route exact path="/settings" component={UserIsNotAuthenticated(Settings)} />
+                <Route exact path="/settings" component={UserIsAuthenticated(Settings)} />
               </Switch>
             </div>
           </div>
